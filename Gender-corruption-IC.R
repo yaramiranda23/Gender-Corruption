@@ -10,9 +10,7 @@ library(stargazer)
 database <- read.csv("https://raw.githubusercontent.com/yaramiranda23/Econometria/master/database1.csv") %>% 
   select(Time, code, countryname, women, Colony, HDI, Rule_of_law, employedwomen) 
 summary(database)
-unique(database$countryname)
-databasena <- database %>% drop_na()
-unique(databasena$countryname)
+
 
 #Adicionando base de dados de corrupção - Banco Mundial 
 BM <- read.csv("https://raw.githubusercontent.com/yaramiranda23/Econometria/master/Corrup.csv")
@@ -25,14 +23,11 @@ databaseBM <- inner_join(database, BM, by = c("Time", "code"))
 #Adicionando a variável PIB
 GDP <- read.csv("https://raw.githubusercontent.com/yaramiranda23/Econometria/master/GDP.csv")
 
-
 GDP <- GDP %>%  select('Time', 'Country.Code', "GDP.per.capita..current.US....NY.GDP.PCAP.CD.", "GDP..current.US....NY.GDP.MKTP.CD.") %>% 
   rename(code = "Country.Code", GDPpercap = "GDP.per.capita..current.US....NY.GDP.PCAP.CD.", 
          GDPall = "GDP..current.US....NY.GDP.MKTP.CD.") 
 databaseBM <- inner_join(databaseBM, GDP, by = c('code', 'Time'))%>% distinct() # Continua com 167
 
-databaseBMna <- databaseBM %>% drop_na()
-unique(databaseBMna$countryname)
 
 #Adicionando a variável sistema eleitoral 
 #elec <- read.csv("https://raw.githubusercontent.com/yaramiranda23/Econometria/master/qogsystem.csv")%>% rename(code = "ccodealp", Time = "year", electoral_system = "gol_est") %>% 
@@ -71,7 +66,7 @@ unique(databaseBM1$countryname)
 
 #Fixed effect
 regFE <- plm(corruption_index ~ women+
-               Rule_of_law+employedwomen+ GDPpercap - 1,
+               Rule_of_law+employedwomen+ log(GDPpercap) - 1,
              data = databaseBM, 
              index = c("countryname", "Time"), 
              model = "within")
@@ -79,7 +74,7 @@ summary(regFE)
 
 #Random effect
 regRE <- plm(corruption_index ~ women+ +
-               Rule_of_law+employedwomen+ GDPpercap  - 1,
+               Rule_of_law+employedwomen+ log(GDPpercap) - 1,
              data = databaseBM, 
              index = c("countryname", "Time"), 
              model = "random")
@@ -87,7 +82,7 @@ summary(regRE)
 
 # First difference
 regFD <- plm(corruption_index ~ women +
-               Rule_of_law+employedwomen+ GDPpercap - 1,
+               Rule_of_law+employedwomen+ log(GDPpercap) - 1,
              data = databaseBM, 
              index = c("countryname", "Time"), 
              model = "fd")
@@ -95,7 +90,7 @@ summary(regFD)
 
 #Pooled OLS
 regpooling <- plm(corruption_index  ~ women+
-                    Rule_of_law+employedwomen+ GDPpercap - 1,
+                    Rule_of_law+employedwomen+ log(GDPpercap) - 1,
                   data = databaseBM, 
                   index = c("countryname", "Time"), 
                   model = "pooling")
@@ -110,36 +105,44 @@ stargazer(regFE,regFD, regRE, regpooling,
           covariate.labels=c("percentage of Woman in parliament", "Rule of Law", "Women Economic rights: percentage of employed women", "GDP per capita"))
 
 
+##### teste
+teste <- lm(corruption_index~women + log(GDPpercap), data = databaseBM)
+stargazer(teste,  type = "text")
+
+
+
+
+
 #################### REGRESSÕES EM ESCADA ##########################
 
 reg1 <- plm(corruption_index ~ women - 1,
              data = databaseBM, 
              index = c("countryname", "Time"), 
-             model = "pooling")
+             model = "within")
 
 reg2 <- plm(corruption_index ~ women + Rule_of_law -  1,
               data = databaseBM, 
               index = c("countryname", "Time"), 
-              model = "pooling")
+              model = "within")
 
-reg3 <- plm(corruption_index ~ women + Rule_of_law +  GDPpercap   - 1,
+reg3 <- plm(corruption_index ~ women + Rule_of_law +  log(GDPpercap)   - 1,
               data = databaseBM, 
               index = c("countryname", "Time"), 
-              model = "pooling")
+              model = "within")
 
 
-reg4 <- plm(corruption_index ~ women + Rule_of_law + GDPpercap  + employedwomen  - 1,
+reg4 <- plm(corruption_index ~ women + Rule_of_law + log(GDPpercap)  + employedwomen  - 1,
             data = databaseBM, 
             index = c("countryname", "Time"), 
-            model = "pooling")
+            model = "within")
 
 
-reg5 <- plm(corruption_index ~ women + Rule_of_law + GDPpercap  + employedwomen  + Colony - 1,
+reg5 <- plm(corruption_index ~ women + Rule_of_law + log(GDPpercap)  + employedwomen  + as.factor(Colony) - 1,
             data = databaseBM, 
             index = c("countryname", "Time"), 
-            model = "pooling")
+            model = "within")
 
-stargazer(reg, reg1, reg2, reg3, reg4, reg5,
+stargazer(reg1, reg2, reg3, reg4, reg5,
           type = "text",
           align = TRUE,
           title = "Results Pooling OLS", 
