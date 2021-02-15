@@ -4,7 +4,6 @@
 library(tidyverse)
 library(plm)
 library(stargazer)
-library(Zelig) #Added for testing panel regressions
 
 databaseBM <- read.csv("databaseBM.csv")
 
