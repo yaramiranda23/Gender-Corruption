@@ -26,8 +26,8 @@ stargazer(regFE,
 # EXPLANATION BY EM: The code below will run the exact same FE regression as above but using the plm command 
 # instead of lm. The results are exactly the same. 
 # See how I indexed by 'countryname' only and specified 'time' with the effect command so R 
-# understands that you want this to be a time fixed effects regression. I suggest you implement this
-# correction in all other regressions that you created using the plm command.
+# understands that you want this to be a time fixed effects regression. I suggest you check to see if you
+# need to make corrections in all other regressions that you have using the plm command.
 
 regFE2 <- plm(corruption_index ~ women+
                Rule_of_law+employedwomen+ log.transform(GDPpercap),
