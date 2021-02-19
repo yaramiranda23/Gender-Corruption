@@ -1,2 +1,2 @@
 # Gender-Corruption
-# *databaseBM* = database used in the script 
+##### databaseBM = database used in the script 
