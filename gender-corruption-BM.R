@@ -30,7 +30,7 @@ log.transform <- function(x,off=0.1){if(sign(min(x,na.rm=T))!=1){x <- x + abs(mi
 # need to make corrections in all other regressions that you have using the plm command.
 
 regFE <- plm(corruption_index ~ women+
-                Rule_of_law+ log.transform(GDPpercap) + openness + democ + as.factor(Colony) - 1,
+                Rule_of_law+ log.transform(GDPpercap) + openness  + as.factor(Colony) - 1,
               data = databaseBM, 
               index = c("countryname"), 
               model = "within", effect = "time")
@@ -39,7 +39,7 @@ regFE <- plm(corruption_index ~ women+
 
 #Random effect
 regRE <- plm(corruption_index ~ women+
-               Rule_of_law + log.transform(GDPpercap) + openness + democ +  as.factor(Colony) - 1,
+               Rule_of_law + log.transform(GDPpercap) + openness  +  as.factor(Colony) - 1,
              data = databaseBM, 
              index = c("countryname"), 
              model = "random", effect = "time")
@@ -47,14 +47,14 @@ regRE <- plm(corruption_index ~ women+
 
 # First difference
 regFD <- plm(corruption_index ~ women+
-               Rule_of_law+ log.transform(GDPpercap)+ openness + democ + as.factor(Colony)- 1,
+               Rule_of_law+ log.transform(GDPpercap)+ openness  + as.factor(Colony)- 1,
              data = databaseBM, 
              index = c("countryname"), 
              model = "fd")#, effect = "time")
 
 #Pooled OLS
 regpooling <- plm(corruption_index ~ women+
-               Rule_of_law+ log.transform(GDPpercap) + openness + democ + as.factor(Colony) - 1,
+               Rule_of_law+ log.transform(GDPpercap) + openness  + as.factor(Colony) - 1,
              data = databaseBM, 
              index = c("countryname"), 
              model = "pooling", effect = "time")
@@ -66,7 +66,7 @@ stargazer(regFE,regFD, regRE, regpooling,
           align = TRUE,
           title = "Results", 
           column.labels=c("Fixed Effect", "First Difference", "Random Effect", "Pooled OLS"), 
-          covariate.labels=c("percentage of Woman in parliament", "Rule of Law", "GDP per capita (log)", "Economic Openness", "Electoral democracy", "Colony"))
+          covariate.labels=c("percentage of Woman in parliament", "Rule of Law", "GDP per capita (log)", "Economic Openness", "Colony"))
 
 
 #################### REGRESSÕES EM ESCADA ##########################
@@ -126,7 +126,7 @@ datadev <- databaseBM %>% filter(HDI > 0.85) %>% distinct()
 
 
 regdeveloped <- plm(corruption_index ~ women+
-               Rule_of_law+employedwomen+ log.transform(GDPpercap) +  openness + democ + Colony,
+               Rule_of_law+employedwomen+ log.transform(GDPpercap) +  openness ,
              data = datadev, 
              index = c("countryname"), 
              model = "within", effect = "time")
@@ -136,7 +136,7 @@ regdeveloped <- plm(corruption_index ~ women+
 datadeveloping <- databaseBM %>% filter(HDI < 0.80 & HDI > 0.65)  %>% distinct ()
 
 regdeveloping <- plm(corruption_index ~ women+
-                      Rule_of_law+employedwomen+ log.transform(GDPpercap) +  openness + democ +  Colony,
+                      Rule_of_law+employedwomen+ log.transform(GDPpercap) +  openness ,
                     data = datadeveloping, 
                     index = c("countryname"), 
                     model = "within", effect = "time")
@@ -160,6 +160,6 @@ stargazer(regdeveloped,regdeveloping, regautoc,
           title = "Results: FE", 
           column.labels=c("HDI > 0.85","HDI 0.65 - 0.80", "Autocracies"), 
           covariate.labels=c("percentage of Woman in parliament", "Rule of Law",
-                             "Women Economic rights: percentage of employed women", "GDP per capita (log)", "Economic Openness", "Electoral democracy", "Colony"))
+                             "Women Economic rights: percentage of employed women", "GDP per capita (log)", "Economic Openness"))
 
 
